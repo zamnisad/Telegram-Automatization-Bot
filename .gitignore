@@ -3,3 +3,4 @@ python.py
 .venv
 data/links.txt
 data/info.txt
+.idea
