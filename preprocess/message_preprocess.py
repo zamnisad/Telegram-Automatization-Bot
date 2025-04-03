@@ -16,20 +16,25 @@ class MessagePreprocess:
         Экранирует специальные символы для MarkdownV2 в Telegram.
         """
         special_chars = r"_*[]()~`>#+-=|{}.!"
-        return re.sub(r"([{}])".format(re.escape(special_chars)), r"\\\1", text)
+        pattern = r"(?<!<USE>)([{}])".format(re.escape(special_chars)) # TEST
+
+        return re.sub(pattern, r"\\\1", text)
 
     async def prepare_post(self):
-        template, summary, image, link, ht_idx = self.GenerateBot.get_all()
+        template, summary, short_sum, image, link, ht_idx = await self.GenerateBot.get_all()
+        self.logger.info(f"Обработка информации для {self.CONFIG['channels'][self.idx]['url']}")
 
-        summary = str(self.escape_markdown_v2(summary))
-        template = str(self.escape_markdown_v2(template))
+        summary = str(await self.escape_markdown_v2(summary))
+        template = str(await self.escape_markdown_v2(template))
 
-        hashtags = str(self.escape_markdown_v2(' '.join(self.CONFIG['channels'][self.idx]['hashtags']))).split()
+        hashtags = str(await self.escape_markdown_v2(' '.join(self.CONFIG['channels'][self.idx]['hashtags']))).split()
 
         fixed_top = f"{template}\n\n"
-        fixed_tail = f"Подробнее [тут]({link})\n\n\n"
-        for i in ht_idx.split():
-            fixed_tail += f'{hashtags[i]} '
+        ht_idx = list(map(int, ht_idx.split())) # check
+        fixed_tail = f"{hashtags[ht_idx[0]]}\n\nПодробнее [тут]({link})"
+
+        for i in ht_idx[1:]:
+            fixed_tail = f' {hashtags[int(i)]}' + fixed_tail
         toc_text = f"📑 *Содержание:*\n"
 
         base_message = f"{fixed_top}{toc_text}\n🔍 {{summary}}\n\n\n" + fixed_tail

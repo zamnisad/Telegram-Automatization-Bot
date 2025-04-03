@@ -3,7 +3,11 @@ import requests
 from bs4 import BeautifulSoup
 from io import BytesIO
 import feedparser
+import asyncio
+import socket
 
+
+socket.setdefaulttimeout(10)
 
 class RSSBot:
     def __init__(self, sent_links, logger):
@@ -27,7 +31,7 @@ class RSSBot:
         self.logger.info("Начало проверки RSS лент...")
         for url in self.CONFIG['channels'][idx]["rss_urls"]:
             try:
-                feed = feedparser.parse(url)
+                feed = await asyncio.to_thread(feedparser.parse, url)
                 for entry in feed.entries:
                     if entry.link not in self.sent_links:
                         return entry
