@@ -1,6 +1,10 @@
 
 python.py
 .venv
-data/links.txt
-data/info.txt
 .idea
+test.py
+data
+last_att_lw.png
+newCONFIGstyle.json
+text.txt
+test_models_imgs
